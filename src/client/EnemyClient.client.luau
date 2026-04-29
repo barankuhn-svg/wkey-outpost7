@@ -16,6 +16,7 @@ local reEnemyClicked = enemyRemotes:WaitForChild("EnemyClicked")
 local reKillAll = enemyRemotes:WaitForChild("KillAll")
 local reUpdateSettings = enemyRemotes:WaitForChild("UpdateSettings")
 local rfGetAllEnemies = enemyRemotes:WaitForChild("GetAllEnemies")
+local reSetPlaying = enemyRemotes:WaitForChild("SetPlaying")
 
 local sharedFolder = ReplicatedStorage:WaitForChild("Shared")
 local localizationModule = require(sharedFolder:WaitForChild("Localization"))
@@ -62,6 +63,37 @@ local function enemyIdText(id)
 	return string.gsub(tr("ui.enemy_id"), "{id}", tostring(id))
 end
 
+local function showClickIdPopup(body, id, size)
+	local existingPopup = body:FindFirstChild("ClickIdPopup")
+	if existingPopup then
+		existingPopup:Destroy()
+	end
+
+	local popup = Instance.new("BillboardGui")
+	popup.Name = "ClickIdPopup"
+	popup.Adornee = body
+	popup.Size = UDim2.fromScale(0.24, 0.09)
+	popup.StudsOffset = Vector3.new(0, size + 2.25, 0)
+	popup.AlwaysOnTop = true
+	popup.Parent = body
+
+	local popupLabel = Instance.new("TextLabel")
+	popupLabel.BackgroundTransparency = 1
+	popupLabel.Size = UDim2.fromScale(1, 1)
+	popupLabel.TextScaled = true
+	popupLabel.Font = Enum.Font.GothamBold
+	popupLabel.TextColor3 = Color3.fromRGB(255, 245, 170)
+	popupLabel.TextStrokeTransparency = 0.3
+	popupLabel.Text = enemyIdText(id)
+	popupLabel.Parent = popup
+
+	task.delay(2, function()
+		if popup and popup.Parent then
+			popup:Destroy()
+		end
+	end)
+end
+
 local function safeLookAt(position, lookDir)
 	local direction = Vector3.new(lookDir.X, 0, lookDir.Z)
 	if direction.Magnitude < 0.001 then
@@ -105,6 +137,7 @@ local function buildEnemy(id, pos, color, material, size)
 	clickDetector.MaxActivationDistance = 64
 	clickDetector.Parent = body
 	clickDetector.MouseClick:Connect(function()
+		showClickIdPopup(body, id, size)
 		print(("[CLIENT] Enemy clicked: ID = %d"):format(id))
 		reEnemyClicked:FireServer(id)
 	end)
@@ -449,6 +482,7 @@ restartButton.Text = tr("ui.restart")
 restartButton.Parent = deathScreen
 
 playButton.Activated:Connect(function()
+	reSetPlaying:FireServer(true)
 	playScreen.Visible = false
 	gameContainer.Visible = true
 end)
@@ -498,6 +532,7 @@ end)
 local function onCharacter(character)
 	local humanoid = character:FindFirstChildOfClass("Humanoid") or character:WaitForChild("Humanoid")
 	humanoid.Died:Connect(function()
+		reSetPlaying:FireServer(false)
 		deathScreen.Visible = true
 	end)
 end
@@ -509,6 +544,7 @@ end
 localPlayer.CharacterAdded:Connect(onCharacter)
 
 restartButton.Activated:Connect(function()
+	reSetPlaying:FireServer(true)
 	reKillAll:FireServer(true)
 	deathScreen.Visible = false
 	gameContainer.Visible = true
