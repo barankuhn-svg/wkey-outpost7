@@ -16,7 +16,7 @@ if not enemyRemotesFolder then
 	enemyRemotesFolder.Parent = ReplicatedStorage
 end
 
-local function getOrCreateRemoteEvent(name: string): RemoteEvent
+local function getOrCreateRemoteEvent(name)
 	local existing = enemyRemotesFolder:FindFirstChild(name)
 	if existing and existing:IsA("RemoteEvent") then
 		return existing
@@ -31,7 +31,7 @@ local function getOrCreateRemoteEvent(name: string): RemoteEvent
 	return remote
 end
 
-local function getOrCreateRemoteFunction(name: string): RemoteFunction
+local function getOrCreateRemoteFunction(name)
 	local existing = enemyRemotesFolder:FindFirstChild(name)
 	if existing and existing:IsA("RemoteFunction") then
 		return existing
@@ -68,21 +68,10 @@ local config = {
 }
 
 -- Enemy State
-type EnemyStateName = "wander" | "chase" | "attack"
-type EnemyData = {
-	id: number,
-	pos: Vector3,
-	lookDir: Vector3,
-	wanderPos: Vector3?,
-	lastWander: number,
-	lastAttack: number,
-	state: EnemyStateName,
-}
-
-local enemies: { [number]: EnemyData } = {}
+local enemies = {}
 local nextEnemyId = 1
 
-local stateCodeByName: { [EnemyStateName]: number } = {
+local stateCodeByName = {
 	wander = 0,
 	chase = 1,
 	attack = 2,
@@ -90,7 +79,7 @@ local stateCodeByName: { [EnemyStateName]: number } = {
 
 local workspaceRef = game:GetService("Workspace")
 
-local function getPlatformPart(): BasePart?
+local function getPlatformPart()
 	local platform = workspaceRef:FindFirstChild("Platform")
 	if platform and platform:IsA("BasePart") then
 		return platform
@@ -98,11 +87,11 @@ local function getPlatformPart(): BasePart?
 	return nil
 end
 
-local function getPlatformTopY(platform: BasePart): number
+local function getPlatformTopY(platform)
 	return platform.Position.Y + (platform.Size.Y * 0.5)
 end
 
-local function randomPointOnPlatform(platform: BasePart): Vector3
+local function randomPointOnPlatform(platform)
 	local halfX = platform.Size.X * 0.5
 	local halfZ = platform.Size.Z * 0.5
 	local x = platform.Position.X + (math.random() * 2 - 1) * halfX
@@ -111,7 +100,7 @@ local function randomPointOnPlatform(platform: BasePart): Vector3
 	return Vector3.new(x, y, z)
 end
 
-local function isCharacterOnPlatform(rootPart: BasePart, platform: BasePart): boolean
+local function isCharacterOnPlatform(rootPart, platform)
 	local relative = rootPart.Position - platform.Position
 	local withinX = math.abs(relative.X) <= (platform.Size.X * 0.5)
 	local withinZ = math.abs(relative.Z) <= (platform.Size.Z * 0.5)
@@ -137,7 +126,7 @@ local materialPool = {
 	Enum.Material.Neon,
 }
 
-local function getAttributes(id: number): (Color3, Enum.Material, number)
+local function getAttributes(id)
 	local rng = Random.new(id * 99991 + 31337)
 	local color = colorPool[rng:NextInteger(1, #colorPool)]
 	local material = materialPool[rng:NextInteger(1, #materialPool)]
@@ -146,10 +135,10 @@ local function getAttributes(id: number): (Color3, Enum.Material, number)
 end
 
 -- Spawn/Destroy
-local function getEnemyCount(): number
+local function getEnemyCount()
 	local count = 0
 	for _ in pairs(enemies) do
-		count += 1
+		count = count + 1
 	end
 	return count
 end
@@ -165,10 +154,10 @@ local function spawnEnemy()
 	end
 
 	local id = nextEnemyId
-	nextEnemyId += 1
+	nextEnemyId = nextEnemyId + 1
 
 	local spawnPos = randomPointOnPlatform(platform)
-	local enemy: EnemyData = {
+	local enemy = {
 		id = id,
 		pos = spawnPos,
 		lookDir = Vector3.new(0, 0, -1),
@@ -183,7 +172,7 @@ local function spawnEnemy()
 	enemySpawn:FireAllClients(id, enemy.pos, color, material, size)
 end
 
-local function destroyEnemy(id: number)
+local function destroyEnemy(id)
 	if enemies[id] == nil then
 		return
 	end
@@ -191,6 +180,7 @@ local function destroyEnemy(id: number)
 	enemies[id] = nil
 	enemyDestroy:FireAllClients({ id })
 end
+local _destroyEnemyReference = destroyEnemy
 
 local function killAll()
 	local ids = {}
@@ -204,7 +194,7 @@ local function killAll()
 	end
 end
 
-local function moveTowards(current: Vector3, target: Vector3, speed: number, dt: number): Vector3
+local function moveTowards(current, target, speed, dt)
 	local delta = target - current
 	local distance = delta.Magnitude
 	if distance <= 0 then
@@ -214,10 +204,10 @@ local function moveTowards(current: Vector3, target: Vector3, speed: number, dt:
 	return current + delta.Unit * step
 end
 
-local function getClosestPlayerOnPlatform(enemyPos: Vector3, platform: BasePart): (Player?, BasePart?, Humanoid?, number)
-	local closestPlayer: Player? = nil
-	local closestRoot: BasePart? = nil
-	local closestHumanoid: Humanoid? = nil
+local function getClosestPlayerOnPlatform(enemyPos, platform)
+	local closestPlayer = nil
+	local closestRoot = nil
+	local closestHumanoid = nil
 	local closestDistance = math.huge
 
 	for _, player in ipairs(Players:GetPlayers()) do
@@ -244,7 +234,7 @@ local function getClosestPlayerOnPlatform(enemyPos: Vector3, platform: BasePart)
 end
 
 -- AI
-local function updateAI(dt: number)
+local function updateAI(dt)
 	local platform = getPlatformPart()
 	if not platform then
 		return
@@ -266,7 +256,12 @@ local function updateAI(dt: number)
 				enemy.state = "attack"
 				if now - enemy.lastAttack >= config.ATTACK_CD then
 					enemy.lastAttack = now
-					print(("Enemy %d attacked %s"):format(enemy.id, targetHumanoid.Parent and targetHumanoid.Parent.Name or "unknown"))
+					print(
+						("Enemy %d attacked %s"):format(
+							enemy.id,
+							targetHumanoid.Parent and targetHumanoid.Parent.Name or "unknown"
+						)
+					)
 					targetHumanoid:TakeDamage(config.ATTACK_DAMAGE)
 				end
 			else
@@ -277,11 +272,11 @@ local function updateAI(dt: number)
 			enemy.state = "wander"
 			local shouldPickNewWander = false
 
-			if enemy.wanderPos == nil then
-				shouldPickNewWander = true
-			elseif now - enemy.lastWander >= config.WANDER_INTERVAL then
-				shouldPickNewWander = true
-			elseif (enemy.wanderPos - enemy.pos).Magnitude <= 0.5 then
+			if
+				enemy.wanderPos == nil
+				or now - enemy.lastWander >= config.WANDER_INTERVAL
+				or (enemy.wanderPos - enemy.pos).Magnitude <= 0.5
+			then
 				shouldPickNewWander = true
 			end
 
@@ -306,12 +301,12 @@ local spawnAccumulator = 0
 local batchAccumulator = 0
 
 RunService.Heartbeat:Connect(function(dt)
-	spawnAccumulator += dt
-	batchAccumulator += dt
+	spawnAccumulator = spawnAccumulator + dt
+	batchAccumulator = batchAccumulator + dt
 
 	local spawnInterval = 1 / math.max(config.SPAWN_RATE, 0.001)
 	while spawnAccumulator >= spawnInterval do
-		spawnAccumulator -= spawnInterval
+		spawnAccumulator = spawnAccumulator - spawnInterval
 		spawnEnemy()
 	end
 
@@ -338,7 +333,7 @@ RunService.Heartbeat:Connect(function(dt)
 end)
 
 -- Remote Handlers
-enemyClicked.OnServerEvent:Connect(function(player: Player, id: any)
+enemyClicked.OnServerEvent:Connect(function(player, id)
 	print(("EnemyClicked from %s on enemy %s"):format(player.Name, tostring(id)))
 end)
 
@@ -346,7 +341,7 @@ killAllRemote.OnServerEvent:Connect(function()
 	killAll()
 end)
 
-updateSettings.OnServerEvent:Connect(function(_player: Player, spawnRate: any, maxEnemies: any)
+updateSettings.OnServerEvent:Connect(function(_player, spawnRate, maxEnemies)
 	local parsedSpawnRate = tonumber(spawnRate) or config.SPAWN_RATE
 	local parsedMaxEnemies = tonumber(maxEnemies) or config.MAX_ENEMIES
 
@@ -354,7 +349,7 @@ updateSettings.OnServerEvent:Connect(function(_player: Player, spawnRate: any, m
 	config.MAX_ENEMIES = math.floor(math.clamp(parsedMaxEnemies, 1, 100))
 end)
 
-getAllEnemies.OnServerInvoke = function(_player: Player)
+getAllEnemies.OnServerInvoke = function(_player)
 	local snapshot = {}
 	for _, enemy in pairs(enemies) do
 		local color, material, size = getAttributes(enemy.id)

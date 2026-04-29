@@ -9,29 +9,23 @@ local localPlayer = Players.LocalPlayer
 
 -- Remote Setup
 local enemyRemotes = ReplicatedStorage:WaitForChild("EnemyRemotes")
-local reEnemySpawn = enemyRemotes:WaitForChild("EnemySpawn") :: RemoteEvent
-local reEnemyDestroy = enemyRemotes:WaitForChild("EnemyDestroy") :: RemoteEvent
-local reEnemyBatch = enemyRemotes:WaitForChild("EnemyBatch") :: RemoteEvent
-local reEnemyClicked = enemyRemotes:WaitForChild("EnemyClicked") :: RemoteEvent
-local reKillAll = enemyRemotes:WaitForChild("KillAll") :: RemoteEvent
-local reUpdateSettings = enemyRemotes:WaitForChild("UpdateSettings") :: RemoteEvent
-local rfGetAllEnemies = enemyRemotes:WaitForChild("GetAllEnemies") :: RemoteFunction
+local reEnemySpawn = enemyRemotes:WaitForChild("EnemySpawn")
+local reEnemyDestroy = enemyRemotes:WaitForChild("EnemyDestroy")
+local reEnemyBatch = enemyRemotes:WaitForChild("EnemyBatch")
+local reEnemyClicked = enemyRemotes:WaitForChild("EnemyClicked")
+local reKillAll = enemyRemotes:WaitForChild("KillAll")
+local reUpdateSettings = enemyRemotes:WaitForChild("UpdateSettings")
+local rfGetAllEnemies = enemyRemotes:WaitForChild("GetAllEnemies")
 
 local sharedFolder = ReplicatedStorage:WaitForChild("Shared")
-local localizationModule = require(sharedFolder:WaitForChild("Localization")) :: { [string]: { [string]: string } }
+local localizationModule = require(sharedFolder:WaitForChild("Localization"))
 
 -- Enemy Registry
-type RegistryEntry = {
-	body: Part,
-	targetCF: CFrame,
-	state: number,
-}
+local enemyRegistry = {}
 
-local enemyRegistry: { [number]: RegistryEntry } = {}
-
-local function resolveLanguage(localeId: string): string
+local function resolveLanguage(localeId)
 	local normalized = string.lower(localeId)
-	local localeMap: { [string]: string } = {
+	local localeMap = {
 		["de"] = "de",
 		["tr"] = "tr",
 		["ru"] = "ru",
@@ -58,17 +52,17 @@ end
 
 local activeLanguage = resolveLanguage(localPlayer.LocaleId or "en")
 
-local function tr(key: string): string
+local function tr(key)
 	local langTable = localizationModule[activeLanguage] or localizationModule.en or {}
 	local fallbackTable = localizationModule.en or {}
 	return langTable[key] or fallbackTable[key] or key
 end
 
-local function enemyIdText(id: number): string
+local function enemyIdText(id)
 	return string.gsub(tr("ui.enemy_id"), "{id}", tostring(id))
 end
 
-local function safeLookAt(position: Vector3, lookDir: Vector3): CFrame
+local function safeLookAt(position, lookDir)
 	local direction = Vector3.new(lookDir.X, 0, lookDir.Z)
 	if direction.Magnitude < 0.001 then
 		direction = Vector3.new(0, 0, -1)
@@ -77,7 +71,7 @@ local function safeLookAt(position: Vector3, lookDir: Vector3): CFrame
 end
 
 -- buildEnemy(id, pos, color, material, size)
-local function buildEnemy(id: number, pos: Vector3, color: Color3, material: Enum.Material, size: number): Part
+local function buildEnemy(id, pos, color, material, size)
 	local body = Instance.new("Part")
 	body.Name = ("Enemy_%d"):format(id)
 	body.Shape = Enum.PartType.Ball
@@ -119,7 +113,7 @@ local function buildEnemy(id: number, pos: Vector3, color: Color3, material: Enu
 end
 
 -- spawnEnemy / destroyEnemies
-local function spawnEnemy(id: number, pos: Vector3, color: Color3, material: Enum.Material, size: number)
+local function spawnEnemy(id, pos, color, material, size)
 	local existing = enemyRegistry[id]
 	if existing then
 		existing.body:Destroy()
@@ -134,7 +128,7 @@ local function spawnEnemy(id: number, pos: Vector3, color: Color3, material: Enu
 	}
 end
 
-local function destroyEnemies(ids: { number })
+local function destroyEnemies(ids)
 	for _, id in ipairs(ids) do
 		local entry = enemyRegistry[id]
 		if entry then
@@ -145,7 +139,7 @@ local function destroyEnemies(ids: { number })
 end
 
 -- RE_Batch handler
-reEnemyBatch.OnClientEvent:Connect(function(batchData: { { any } })
+reEnemyBatch.OnClientEvent:Connect(function(batchData)
 	for _, row in ipairs(batchData) do
 		local id = tonumber(row[1])
 		local px = tonumber(row[2])
@@ -167,16 +161,16 @@ reEnemyBatch.OnClientEvent:Connect(function(batchData: { { any } })
 	end
 end)
 
-reEnemySpawn.OnClientEvent:Connect(function(id: number, pos: Vector3, color: Color3, material: Enum.Material, size: number)
+reEnemySpawn.OnClientEvent:Connect(function(id, pos, color, material, size)
 	spawnEnemy(id, pos, color, material, size)
 end)
 
-reEnemyDestroy.OnClientEvent:Connect(function(ids: { number })
+reEnemyDestroy.OnClientEvent:Connect(function(ids)
 	destroyEnemies(ids)
 end)
 
 -- RenderStepped lerp
-RunService.RenderStepped:Connect(function(dt: number)
+RunService.RenderStepped:Connect(function(dt)
 	local alpha = 1 - math.exp(-18 * dt)
 	for _, entry in pairs(enemyRegistry) do
 		entry.body.CFrame = entry.body.CFrame:Lerp(entry.targetCF, alpha)
@@ -193,7 +187,7 @@ task.defer(function()
 		return
 	end
 
-	local snapshot = snapshotOrErr :: { { [string]: any } }
+	local snapshot = snapshotOrErr
 	for _, enemyData in ipairs(snapshot) do
 		local id = tonumber(enemyData.id)
 		local pos = enemyData.pos
@@ -203,8 +197,15 @@ task.defer(function()
 		local lookDir = enemyData.lookDir
 		local stateCode = tonumber(enemyData.stateCode) or 0
 
-		if id and typeof(pos) == "Vector3" and typeof(color) == "Color3" and typeof(material) == "EnumItem" and size and typeof(lookDir) == "Vector3" then
-			spawnEnemy(id, pos, color, material :: Enum.Material, size)
+		if
+			id
+			and typeof(pos) == "Vector3"
+			and typeof(color) == "Color3"
+			and typeof(material) == "EnumItem"
+			and size
+			and typeof(lookDir) == "Vector3"
+		then
+			spawnEnemy(id, pos, color, material, size)
 			local entry = enemyRegistry[id]
 			if entry then
 				entry.targetCF = safeLookAt(pos, lookDir)
@@ -282,21 +283,21 @@ panelLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
 panelLayout.SortOrder = Enum.SortOrder.LayoutOrder
 panelLayout.Parent = panel
 
-local function createLabel(text: string, order: number): TextLabel
+local function createLabel(text, order)
 	local label = Instance.new("TextLabel")
 	label.LayoutOrder = order
 	label.Size = UDim2.fromScale(1, 0.09)
 	label.BackgroundTransparency = 1
 	label.TextXAlignment = Enum.TextXAlignment.Left
 	label.TextScaled = true
-	label.Font = Enum.Font.GothamSemibold
+	label.Font = Enum.Font.GothamMedium
 	label.TextColor3 = Color3.new(1, 1, 1)
 	label.Text = text
 	label.Parent = panel
 	return label
 end
 
-local function createInput(order: number, initialValue: string): TextBox
+local function createInput(order, initialValue)
 	local input = Instance.new("TextBox")
 	input.LayoutOrder = order
 	input.Size = UDim2.fromScale(1, 0.11)
@@ -311,7 +312,7 @@ local function createInput(order: number, initialValue: string): TextBox
 	return input
 end
 
-local function createSlider(order: number, minValue: number, maxValue: number, initialValue: number): (Frame, () -> number, (number) -> ())
+local function createSlider(order, minValue, maxValue, initialValue)
 	local container = Instance.new("Frame")
 	container.LayoutOrder = order
 	container.Size = UDim2.fromScale(1, 0.08)
@@ -332,46 +333,58 @@ local function createSlider(order: number, minValue: number, maxValue: number, i
 	local dragging = false
 	local value = initialValue
 
-	local function setFromPercent(percent: number)
+	local function setFromPercent(percent)
 		local clamped = math.clamp(percent, 0, 1)
 		value = minValue + (maxValue - minValue) * clamped
 		fill.Size = UDim2.fromScale(clamped, 1)
 	end
 
-	local function setValue(newValue: number)
+	local function setValue(newValue)
 		local clampedValue = math.clamp(newValue, minValue, maxValue)
 		local percent = (clampedValue - minValue) / (maxValue - minValue)
 		setFromPercent(percent)
 	end
 
-	local function updateFromX(x: number)
+	local function updateFromX(x)
 		local startX = track.AbsolutePosition.X
 		local width = math.max(track.AbsoluteSize.X, 1)
 		setFromPercent((x - startX) / width)
 	end
 
-	track.InputBegan:Connect(function(input: InputObject)
-		if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+	track.InputBegan:Connect(function(input)
+		if
+			input.UserInputType == Enum.UserInputType.MouseButton1
+			or input.UserInputType == Enum.UserInputType.Touch
+		then
 			dragging = true
 			updateFromX(input.Position.X)
 		end
 	end)
 
-	track.InputEnded:Connect(function(input: InputObject)
-		if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+	track.InputEnded:Connect(function(input)
+		if
+			input.UserInputType == Enum.UserInputType.MouseButton1
+			or input.UserInputType == Enum.UserInputType.Touch
+		then
 			dragging = false
 		end
 	end)
 
-	UserInputService.InputChanged:Connect(function(input: InputObject)
-		if dragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
+	UserInputService.InputChanged:Connect(function(input)
+		if
+			dragging
+			and (
+				input.UserInputType == Enum.UserInputType.MouseMovement
+				or input.UserInputType == Enum.UserInputType.Touch
+			)
+		then
 			updateFromX(input.Position.X)
 		end
 	end)
 
 	setValue(initialValue)
 
-	return container, function(): number
+	return container, function()
 		return value
 	end, setValue
 end
@@ -482,8 +495,8 @@ killAllButton.Activated:Connect(function()
 	reKillAll:FireServer()
 end)
 
-local function onCharacter(character: Model)
-	local humanoid = character:FindFirstChildOfClass("Humanoid") or character:WaitForChild("Humanoid") :: Humanoid
+local function onCharacter(character)
+	local humanoid = character:FindFirstChildOfClass("Humanoid") or character:WaitForChild("Humanoid")
 	humanoid.Died:Connect(function()
 		deathScreen.Visible = true
 	end)
