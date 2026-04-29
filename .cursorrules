@@ -1,0 +1,66 @@
+# Cursor Rules — WKey Take-Home (Enemy Spawner)
+
+## Sprache & Style
+- Ausschließlich Luau (--!strict überall)
+- Kommentare auf Englisch
+- Variablen und Funktionen: camelCase
+- Konstanten: UPPER_SNAKE_CASE
+- Typen wo möglich annotieren
+
+## Architektur
+- One-Script Hierarchy: 1 Server Script, 1 LocalScript, 1 Shared ModuleScript (nur Lokalisierung)
+- Kein Scope Creep — nur was im GDD steht
+- Server-Logik NIEMALS auf dem Client
+- Keine unnötigen RemoteEvents — so wenig Netzwerk-Traffic wie möglich
+
+## Custom Replication (KERN — nicht anfassen)
+- Enemies existieren server-seitig NUR als Lua-Tabellen, KEIN Part in Workspace
+- Batch-Update alle 50ms via einem einzigen RemoteEvent:FireAllClients()
+- Client rendert lokale Parts, bewegt sie via exponentiellem Lerp
+- NIEMALS default Roblox Replikation für Enemy-Bewegung nutzen
+
+## Commits
+- Nach jedem abgeschlossenen Feature oder Fix committen
+- Format: `feat: ...` / `fix: ...` / `chore: ...`
+- Auf Englisch, kurz, präzise
+- Keine Tool-Namen in Commit Messages (keine KI-Tools, keine externen Tools)
+- Beispiele:
+  - `chore: init rojo project structure`
+  - `feat: platform and spawnlocation`
+  - `feat: server enemy spawn and AI`
+  - `feat: custom replication batch system`
+  - `feat: client rendering and lerp`
+  - `feat: enemy animations`
+  - `feat: UI play screen and game UI`
+  - `feat: localization 9 languages`
+  - `fix: mobile UI scaling`
+
+## Was NICHT erwähnt werden darf (nirgendwo — nicht in Code, Commits, README)
+- Keine KI-Tool Namen
+- Keine externen Asset-Tool Namen
+- Keine Bibliotheken die nicht im Repository stehen
+
+## README
+- Kurze Beschreibung des Projekts
+- Setup Anleitung (Rojo serve → Studio connect)
+- Verwendete Libraries falls vorhanden
+- Keine Tool-Namen die nicht erwähnt werden dürfen
+
+## Dateistruktur
+```
+wkey-outpost7/
+├── .cursorrules
+├── default.project.json
+├── README.md
+└── src/
+    ├── server/
+    │   └── Main.server.luau
+    ├── client/
+    │   └── EnemyClient.client.luau
+    └── shared/
+        └── Localization.luau
+```
+
+## GDD
+Das vollständige GDD liegt in GDD.md — das ist die einzige Source of Truth.
+Bei Unklarheiten: GDD hat Vorrang.
