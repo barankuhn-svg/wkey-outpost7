@@ -72,8 +72,8 @@ local function showClickIdPopup(body, id, size)
 	local popup = Instance.new("BillboardGui")
 	popup.Name = "ClickIdPopup"
 	popup.Adornee = body
-	popup.Size = UDim2.fromScale(0.24, 0.09)
-	popup.StudsOffset = Vector3.new(0, size + 2.25, 0)
+	popup.Size = UDim2.fromScale(1.8, 0.72)
+	popup.StudsOffset = Vector3.new(0, size + 2.8, 0)
 	popup.AlwaysOnTop = true
 	popup.Parent = body
 
@@ -83,7 +83,8 @@ local function showClickIdPopup(body, id, size)
 	popupLabel.TextScaled = true
 	popupLabel.Font = Enum.Font.GothamBold
 	popupLabel.TextColor3 = Color3.fromRGB(255, 245, 170)
-	popupLabel.TextStrokeTransparency = 0.3
+	popupLabel.TextStrokeColor3 = Color3.fromRGB(20, 20, 20)
+	popupLabel.TextStrokeTransparency = 0.15
 	popupLabel.Text = enemyIdText(id)
 	popupLabel.Parent = popup
 
@@ -114,24 +115,6 @@ local function buildEnemy(id, pos, color, material, size)
 	body.Material = material
 	body.CFrame = CFrame.new(pos)
 	body.Parent = workspace
-
-	local billboard = Instance.new("BillboardGui")
-	billboard.Name = "EnemyId"
-	billboard.Adornee = body
-	billboard.Size = UDim2.fromScale(0.2, 0.08)
-	billboard.StudsOffset = Vector3.new(0, size + 1.25, 0)
-	billboard.AlwaysOnTop = true
-	billboard.Parent = body
-
-	local label = Instance.new("TextLabel")
-	label.BackgroundTransparency = 1
-	label.Size = UDim2.fromScale(1, 1)
-	label.TextScaled = true
-	label.Font = Enum.Font.GothamBold
-	label.TextColor3 = Color3.new(1, 1, 1)
-	label.TextStrokeTransparency = 0.5
-	label.Text = enemyIdText(id)
-	label.Parent = billboard
 
 	local clickDetector = Instance.new("ClickDetector")
 	clickDetector.MaxActivationDistance = 64
