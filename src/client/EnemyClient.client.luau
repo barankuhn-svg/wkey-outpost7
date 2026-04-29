@@ -193,7 +193,6 @@ local function buildEnemy(id, pos, color, material, size)
 	clickDetector.Parent = body
 	clickDetector.MouseClick:Connect(function()
 		showClickIdPopup(body, id, size)
-		print(("[CLIENT] Enemy clicked: ID = %d"):format(id))
 		reEnemyClicked:FireServer(id)
 	end)
 
@@ -334,9 +333,11 @@ createRainbowTitle(playScreen, tr("ui.game_title"))
 
 local playButton = Instance.new("TextButton")
 playButton.Size = UDim2.new(0.36, 0, 0, 56)
-playButton.Position = UDim2.fromScale(0.32, 0.72)
+playButton.Position = UDim2.fromScale(0.32, 0.69)
 playButton.BackgroundColor3 = Color3.fromRGB(90, 255, 150)
 playButton.TextColor3 = Color3.new(1, 1, 1)
+playButton.TextStrokeColor3 = Color3.new(1, 1, 1)
+playButton.TextStrokeTransparency = 0.1
 playButton.TextScaled = true
 playButton.Font = Enum.Font.GothamBlack
 playButton.Text = tr("ui.play_button")
@@ -383,17 +384,6 @@ playButton.MouseLeave:Connect(function()
 	hoverInTween:Cancel()
 	hoverOutTween:Play()
 end)
-
-print("[CLIENT] Play background debug", {
-	visible = backgroundImage.Visible,
-	size = tostring(backgroundImage.Size),
-	imageTransparency = backgroundImage.ImageTransparency,
-	scaleType = tostring(backgroundImage.ScaleType),
-	backgroundTransparency = backgroundImage.BackgroundTransparency,
-	zIndex = backgroundImage.ZIndex,
-	image = backgroundImage.Image,
-	playScreenVisible = playScreen.Visible,
-})
 
 local gameContainer = Instance.new("Frame")
 gameContainer.Name = "GameContainer"
