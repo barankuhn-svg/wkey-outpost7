@@ -19,6 +19,7 @@
 
     "ReplicatedStorage": {
       "Shared": {
+        "$className": "Folder",
         "Localization": {
           "$path": "src/shared/Localization.luau"
         }
