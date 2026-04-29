@@ -509,9 +509,8 @@ end
 localPlayer.CharacterAdded:Connect(onCharacter)
 
 restartButton.Activated:Connect(function()
-	reKillAll:FireServer()
+	reKillAll:FireServer(true)
 	deathScreen.Visible = false
-	localPlayer:LoadCharacter()
 	gameContainer.Visible = true
 	playScreen.Visible = false
 end)

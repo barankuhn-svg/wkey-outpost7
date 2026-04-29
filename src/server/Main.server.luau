@@ -337,8 +337,14 @@ enemyClicked.OnServerEvent:Connect(function(player, id)
 	print(("EnemyClicked from %s on enemy %s"):format(player.Name, tostring(id)))
 end)
 
-killAllRemote.OnServerEvent:Connect(function()
+killAllRemote.OnServerEvent:Connect(function(player, shouldRespawn)
 	killAll()
+
+	if shouldRespawn == true and player and player:IsA("Player") then
+		task.defer(function()
+			player:LoadCharacter()
+		end)
+	end
 end)
 
 updateSettings.OnServerEvent:Connect(function(_player, spawnRate, maxEnemies)
