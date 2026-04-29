@@ -20,7 +20,7 @@ local reSetPlaying = enemyRemotes:WaitForChild("SetPlaying")
 
 local sharedFolder = ReplicatedStorage:WaitForChild("Shared")
 local localizationModule = require(sharedFolder:WaitForChild("Localization"))
-local START_SCREEN_BACKGROUND_IMAGE = "rbxassetid://120963582040616"
+local START_SCREEN_BACKGROUND_IMAGE = "rbxassetid://95766142455215"
 
 -- Enemy Registry
 local enemyRegistry = {}
@@ -250,19 +250,14 @@ playScreen.Parent = screenGui
 
 local backgroundImage = Instance.new("ImageLabel")
 backgroundImage.Name = "BackgroundImage"
+backgroundImage.Visible = true
 backgroundImage.Size = UDim2.fromScale(1, 1)
 backgroundImage.BackgroundTransparency = 1
+backgroundImage.ImageTransparency = 0
 backgroundImage.Image = START_SCREEN_BACKGROUND_IMAGE
 backgroundImage.ScaleType = Enum.ScaleType.Crop
-backgroundImage.ZIndex = 0
+backgroundImage.ZIndex = 1
 backgroundImage.Parent = playScreen
-
-local backgroundTint = Instance.new("Frame")
-backgroundTint.Name = "BackgroundTint"
-backgroundTint.Size = UDim2.fromScale(1, 1)
-backgroundTint.BackgroundColor3 = Color3.new(0, 0, 0)
-backgroundTint.BackgroundTransparency = 0.35
-backgroundTint.Parent = playScreen
 
 local titleLabel = Instance.new("TextLabel")
 titleLabel.BackgroundTransparency = 1
@@ -272,6 +267,7 @@ titleLabel.TextScaled = true
 titleLabel.Font = Enum.Font.GothamBlack
 titleLabel.TextColor3 = Color3.new(1, 1, 1)
 titleLabel.Text = tr("ui.game_title")
+titleLabel.ZIndex = 2
 titleLabel.Parent = playScreen
 
 local playButton = Instance.new("TextButton")
@@ -282,7 +278,19 @@ playButton.TextColor3 = Color3.new(1, 1, 1)
 playButton.TextScaled = true
 playButton.Font = Enum.Font.GothamBold
 playButton.Text = tr("ui.play_button")
+playButton.ZIndex = 2
 playButton.Parent = playScreen
+
+print("[CLIENT] Play background debug", {
+	visible = backgroundImage.Visible,
+	size = tostring(backgroundImage.Size),
+	imageTransparency = backgroundImage.ImageTransparency,
+	scaleType = tostring(backgroundImage.ScaleType),
+	backgroundTransparency = backgroundImage.BackgroundTransparency,
+	zIndex = backgroundImage.ZIndex,
+	image = backgroundImage.Image,
+	playScreenVisible = playScreen.Visible,
+})
 
 local gameContainer = Instance.new("Frame")
 gameContainer.Name = "GameContainer"
