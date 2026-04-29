@@ -3,6 +3,7 @@
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
+local TweenService = game:GetService("TweenService")
 local UserInputService = game:GetService("UserInputService")
 
 local localPlayer = Players.LocalPlayer
@@ -102,6 +103,76 @@ local function safeLookAt(position, lookDir)
 		direction = Vector3.new(0, 0, -1)
 	end
 	return CFrame.lookAt(position, position + direction.Unit)
+end
+
+local function createRainbowTitle(parent, text)
+	local colors = {
+		Color3.fromRGB(255, 70, 70),
+		Color3.fromRGB(255, 150, 50),
+		Color3.fromRGB(255, 235, 70),
+		Color3.fromRGB(105, 255, 120),
+		Color3.fromRGB(80, 245, 255),
+		Color3.fromRGB(90, 145, 255),
+		Color3.fromRGB(170, 115, 255),
+		Color3.fromRGB(255, 110, 220),
+	}
+
+	local titleFrame = Instance.new("Frame")
+	titleFrame.Name = "RainbowTitle"
+	titleFrame.Size = UDim2.fromScale(0.9, 0.18)
+	titleFrame.Position = UDim2.fromScale(0.05, 0.07)
+	titleFrame.BackgroundTransparency = 1
+	titleFrame.Parent = parent
+
+	local titleLayout = Instance.new("UIListLayout")
+	titleLayout.FillDirection = Enum.FillDirection.Horizontal
+	titleLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
+	titleLayout.VerticalAlignment = Enum.VerticalAlignment.Center
+	titleLayout.Padding = UDim.new(0.002, 0)
+	titleLayout.Parent = titleFrame
+
+	local colorIndex = 1
+	for i = 1, #text do
+		local character = string.sub(text, i, i)
+		local letterFrame = Instance.new("Frame")
+		letterFrame.BackgroundTransparency = 1
+		letterFrame.LayoutOrder = i
+		if character == " " then
+			letterFrame.Size = UDim2.fromScale(0.018, 1)
+		else
+			letterFrame.Size = UDim2.fromScale(0.03, 1)
+		end
+		letterFrame.Parent = titleFrame
+
+		if character ~= " " then
+			local shadow = Instance.new("TextLabel")
+			shadow.BackgroundTransparency = 1
+			shadow.Size = UDim2.fromScale(1, 1)
+			shadow.Position = UDim2.fromOffset(3, 3)
+			shadow.TextScaled = true
+			shadow.Font = Enum.Font.GothamBlack
+			shadow.TextColor3 = Color3.fromRGB(0, 0, 0)
+			shadow.TextTransparency = 0.45
+			shadow.Text = character
+			shadow.Parent = letterFrame
+
+			local label = Instance.new("TextLabel")
+			label.BackgroundTransparency = 1
+			label.Size = UDim2.fromScale(1, 1)
+			label.TextScaled = true
+			label.Font = Enum.Font.GothamBlack
+			label.TextColor3 = colors[colorIndex]
+			label.TextStrokeColor3 = Color3.fromRGB(20, 20, 20)
+			label.TextStrokeTransparency = 0
+			label.Text = character
+			label.Parent = letterFrame
+
+			colorIndex += 1
+			if colorIndex > #colors then
+				colorIndex = 1
+			end
+		end
+	end
 end
 
 -- buildEnemy(id, pos, color, material, size)
@@ -259,27 +330,59 @@ backgroundImage.ScaleType = Enum.ScaleType.Crop
 backgroundImage.ZIndex = 1
 backgroundImage.Parent = playScreen
 
-local titleLabel = Instance.new("TextLabel")
-titleLabel.BackgroundTransparency = 1
-titleLabel.Size = UDim2.fromScale(0.7, 0.2)
-titleLabel.Position = UDim2.fromScale(0.15, 0.2)
-titleLabel.TextScaled = true
-titleLabel.Font = Enum.Font.GothamBlack
-titleLabel.TextColor3 = Color3.new(1, 1, 1)
-titleLabel.Text = tr("ui.game_title")
-titleLabel.ZIndex = 2
-titleLabel.Parent = playScreen
+createRainbowTitle(playScreen, tr("ui.game_title"))
 
 local playButton = Instance.new("TextButton")
-playButton.Size = UDim2.new(0.3, 0, 0, 44)
-playButton.Position = UDim2.fromScale(0.35, 0.72)
-playButton.BackgroundColor3 = Color3.fromRGB(35, 95, 210)
+playButton.Size = UDim2.new(0.36, 0, 0, 56)
+playButton.Position = UDim2.fromScale(0.32, 0.72)
+playButton.BackgroundColor3 = Color3.fromRGB(90, 255, 150)
 playButton.TextColor3 = Color3.new(1, 1, 1)
 playButton.TextScaled = true
-playButton.Font = Enum.Font.GothamBold
+playButton.Font = Enum.Font.GothamBlack
 playButton.Text = tr("ui.play_button")
 playButton.ZIndex = 2
 playButton.Parent = playScreen
+
+local playButtonCorner = Instance.new("UICorner")
+playButtonCorner.CornerRadius = UDim.new(1, 0)
+playButtonCorner.Parent = playButton
+
+local playButtonGradient = Instance.new("UIGradient")
+playButtonGradient.Color = ColorSequence.new({
+	ColorSequenceKeypoint.new(0, Color3.fromRGB(65, 255, 120)),
+	ColorSequenceKeypoint.new(1, Color3.fromRGB(70, 245, 255)),
+})
+playButtonGradient.Rotation = 12
+playButtonGradient.Parent = playButton
+
+local playButtonStroke = Instance.new("UIStroke")
+playButtonStroke.Color = Color3.new(1, 1, 1)
+playButtonStroke.Thickness = 3
+playButtonStroke.Transparency = 0.15
+playButtonStroke.Parent = playButton
+
+local playButtonScale = Instance.new("UIScale")
+playButtonScale.Scale = 1
+playButtonScale.Parent = playButton
+
+local hoverInTween =
+	TweenService:Create(playButtonScale, TweenInfo.new(0.14, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+		Scale = 1.05,
+	})
+local hoverOutTween =
+	TweenService:Create(playButtonScale, TweenInfo.new(0.14, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+		Scale = 1,
+	})
+
+playButton.MouseEnter:Connect(function()
+	hoverOutTween:Cancel()
+	hoverInTween:Play()
+end)
+
+playButton.MouseLeave:Connect(function()
+	hoverInTween:Cancel()
+	hoverOutTween:Play()
+end)
 
 print("[CLIENT] Play background debug", {
 	visible = backgroundImage.Visible,
