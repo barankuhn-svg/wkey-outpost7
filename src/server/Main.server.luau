@@ -53,6 +53,7 @@ local enemyClicked = getOrCreateRemoteEvent("EnemyClicked")
 local killAllRemote = getOrCreateRemoteEvent("KillAll")
 local updateSettings = getOrCreateRemoteEvent("UpdateSettings")
 local getAllEnemies = getOrCreateRemoteFunction("GetAllEnemies")
+local setPlaying = getOrCreateRemoteEvent("SetPlaying")
 
 -- Config
 local config = {
@@ -70,6 +71,7 @@ local config = {
 -- Enemy State
 local enemies = {}
 local nextEnemyId = 1
+local activePlayers = {}
 
 local stateCodeByName = {
 	wander = 0,
@@ -98,6 +100,23 @@ local function randomPointOnPlatform(platform)
 	local z = platform.Position.Z + (math.random() * 2 - 1) * halfZ
 	local y = getPlatformTopY(platform) + 1.5
 	return Vector3.new(x, y, z)
+end
+
+local function placeCharacterOnPlatform(character)
+	local platform = getPlatformPart()
+	if not platform then
+		return
+	end
+
+	local rootPart = character:FindFirstChild("HumanoidRootPart") or character:WaitForChild("HumanoidRootPart", 5)
+	if not rootPart or not rootPart:IsA("BasePart") then
+		return
+	end
+
+	local spawnPosition = Vector3.new(platform.Position.X, getPlatformTopY(platform) + 3, platform.Position.Z)
+	rootPart.CFrame = CFrame.new(spawnPosition)
+	rootPart.AssemblyLinearVelocity = Vector3.zero
+	rootPart.AssemblyAngularVelocity = Vector3.zero
 end
 
 local function isCharacterOnPlatform(rootPart, platform)
@@ -141,6 +160,13 @@ local function getEnemyCount()
 		count = count + 1
 	end
 	return count
+end
+
+local function hasActivePlayers()
+	for _ in pairs(activePlayers) do
+		return true
+	end
+	return false
 end
 
 local function spawnEnemy()
@@ -211,19 +237,21 @@ local function getClosestPlayerOnPlatform(enemyPos, platform)
 	local closestDistance = math.huge
 
 	for _, player in ipairs(Players:GetPlayers()) do
-		local character = player.Character
-		if character then
-			local rootPart = character:FindFirstChild("HumanoidRootPart")
-			local humanoid = character:FindFirstChildOfClass("Humanoid")
-			if rootPart and rootPart:IsA("BasePart") and humanoid and humanoid.Health > 0 then
-				if isCharacterOnPlatform(rootPart, platform) then
-					local delta = rootPart.Position - enemyPos
-					local xzDistance = Vector2.new(delta.X, delta.Z).Magnitude
-					if xzDistance < closestDistance then
-						closestDistance = xzDistance
-						closestPlayer = player
-						closestRoot = rootPart
-						closestHumanoid = humanoid
+		if activePlayers[player.UserId] == true then
+			local character = player.Character
+			if character then
+				local rootPart = character:FindFirstChild("HumanoidRootPart")
+				local humanoid = character:FindFirstChildOfClass("Humanoid")
+				if rootPart and rootPart:IsA("BasePart") and humanoid and humanoid.Health > 0 then
+					if isCharacterOnPlatform(rootPart, platform) then
+						local delta = rootPart.Position - enemyPos
+						local xzDistance = Vector2.new(delta.X, delta.Z).Magnitude
+						if xzDistance < closestDistance then
+							closestDistance = xzDistance
+							closestPlayer = player
+							closestRoot = rootPart
+							closestHumanoid = humanoid
+						end
 					end
 				end
 			end
@@ -307,7 +335,9 @@ RunService.Heartbeat:Connect(function(dt)
 	local spawnInterval = 1 / math.max(config.SPAWN_RATE, 0.001)
 	while spawnAccumulator >= spawnInterval do
 		spawnAccumulator = spawnAccumulator - spawnInterval
-		spawnEnemy()
+		if hasActivePlayers() then
+			spawnEnemy()
+		end
 	end
 
 	updateAI(dt)
@@ -347,6 +377,10 @@ killAllRemote.OnServerEvent:Connect(function(player, shouldRespawn)
 	end
 end)
 
+setPlaying.OnServerEvent:Connect(function(player, isPlaying)
+	activePlayers[player.UserId] = isPlaying == true
+end)
+
 updateSettings.OnServerEvent:Connect(function(_player, spawnRate, maxEnemies)
 	local parsedSpawnRate = tonumber(spawnRate) or config.SPAWN_RATE
 	local parsedMaxEnemies = tonumber(maxEnemies) or config.MAX_ENEMIES
@@ -370,4 +404,26 @@ getAllEnemies.OnServerInvoke = function(_player)
 		})
 	end
 	return snapshot
+end
+
+Players.PlayerRemoving:Connect(function(player)
+	activePlayers[player.UserId] = nil
+end)
+
+Players.PlayerAdded:Connect(function(player)
+	player.CharacterAdded:Connect(function(character)
+		placeCharacterOnPlatform(character)
+	end)
+end)
+
+for _, player in ipairs(Players:GetPlayers()) do
+	player.CharacterAdded:Connect(function(character)
+		placeCharacterOnPlatform(character)
+	end)
+
+	if player.Character then
+		task.defer(function()
+			placeCharacterOnPlatform(player.Character)
+		end)
+	end
 end
