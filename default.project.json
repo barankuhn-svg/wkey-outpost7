@@ -1,0 +1,66 @@
+{
+  "name": "wkey-outpost7",
+  "tree": {
+    "$className": "DataModel",
+
+    "ServerScriptService": {
+      "Main": {
+        "$path": "src/server/Main.server.luau"
+      }
+    },
+
+    "StarterPlayer": {
+      "StarterPlayerScripts": {
+        "EnemyClient": {
+          "$path": "src/client/EnemyClient.client.luau"
+        }
+      }
+    },
+
+    "ReplicatedStorage": {
+      "Shared": {
+        "Localization": {
+          "$path": "src/shared/Localization.luau"
+        }
+      }
+    },
+
+    "Workspace": {
+      "Platform": {
+        "$className": "Part",
+        "$properties": {
+          "Anchored": true,
+          "Size": [
+            50,
+            1,
+            50
+          ],
+          "Position": [
+            0,
+            1,
+            0
+          ],
+          "Material": "Concrete",
+          "Color": [
+            0.2,
+            0.2,
+            0.2
+          ],
+          "Name": "Platform"
+        }
+      },
+      "SpawnLocation": {
+        "$className": "SpawnLocation",
+        "$properties": {
+          "Anchored": true,
+          "Position": [
+            0,
+            2,
+            0
+          ],
+          "Neutral": true
+        }
+      }
+    }
+  }
+}
