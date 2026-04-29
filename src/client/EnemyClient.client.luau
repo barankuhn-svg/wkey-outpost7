@@ -20,6 +20,7 @@ local reSetPlaying = enemyRemotes:WaitForChild("SetPlaying")
 
 local sharedFolder = ReplicatedStorage:WaitForChild("Shared")
 local localizationModule = require(sharedFolder:WaitForChild("Localization"))
+local START_SCREEN_BACKGROUND_IMAGE = "rbxassetid://120963582040616"
 
 -- Enemy Registry
 local enemyRegistry = {}
@@ -246,6 +247,22 @@ playScreen.Name = "PlayScreen"
 playScreen.Size = UDim2.fromScale(1, 1)
 playScreen.BackgroundColor3 = Color3.fromRGB(12, 12, 16)
 playScreen.Parent = screenGui
+
+local backgroundImage = Instance.new("ImageLabel")
+backgroundImage.Name = "BackgroundImage"
+backgroundImage.Size = UDim2.fromScale(1, 1)
+backgroundImage.BackgroundTransparency = 1
+backgroundImage.Image = START_SCREEN_BACKGROUND_IMAGE
+backgroundImage.ScaleType = Enum.ScaleType.Crop
+backgroundImage.ZIndex = 0
+backgroundImage.Parent = playScreen
+
+local backgroundTint = Instance.new("Frame")
+backgroundTint.Name = "BackgroundTint"
+backgroundTint.Size = UDim2.fromScale(1, 1)
+backgroundTint.BackgroundColor3 = Color3.new(0, 0, 0)
+backgroundTint.BackgroundTransparency = 0.35
+backgroundTint.Parent = playScreen
 
 local titleLabel = Instance.new("TextLabel")
 titleLabel.BackgroundTransparency = 1

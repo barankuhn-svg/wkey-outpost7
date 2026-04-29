@@ -10,7 +10,7 @@ local localization = {
 		["ui.you_died"] = "YOU DIED",
 		["ui.restart"] = "RESTART",
 		["ui.enemy_id"] = "ID: {id}",
-		["ui.game_title"] = "OUTPOST-7",
+		["ui.game_title"] = "SLIME SPAWNER SURVIVAL",
 	},
 	de = {
 		["ui.play_button"] = "SPIELEN",
@@ -21,7 +21,7 @@ local localization = {
 		["ui.you_died"] = "DU BIST GESTORBEN",
 		["ui.restart"] = "NEUSTART",
 		["ui.enemy_id"] = "ID: {id}",
-		["ui.game_title"] = "OUTPOST-7",
+		["ui.game_title"] = "SLIME SPAWNER SURVIVAL",
 	},
 	tr = {
 		["ui.play_button"] = "OYNA",
@@ -32,7 +32,7 @@ local localization = {
 		["ui.you_died"] = "OLDUN",
 		["ui.restart"] = "YENIDEN BASLAT",
 		["ui.enemy_id"] = "ID: {id}",
-		["ui.game_title"] = "OUTPOST-7",
+		["ui.game_title"] = "SLIME SPAWNER SURVIVAL",
 	},
 	ru = {
 		["ui.play_button"] = "IGRAT",
@@ -43,7 +43,7 @@ local localization = {
 		["ui.you_died"] = "VY POGIBLI",
 		["ui.restart"] = "PEREZAPUSK",
 		["ui.enemy_id"] = "ID: {id}",
-		["ui.game_title"] = "OUTPOST-7",
+		["ui.game_title"] = "SLIME SPAWNER SURVIVAL",
 	},
 	fr = {
 		["ui.play_button"] = "JOUER",
@@ -54,7 +54,7 @@ local localization = {
 		["ui.you_died"] = "VOUS ETES MORT",
 		["ui.restart"] = "REDEMARRER",
 		["ui.enemy_id"] = "ID : {id}",
-		["ui.game_title"] = "OUTPOST-7",
+		["ui.game_title"] = "SLIME SPAWNER SURVIVAL",
 	},
 	es = {
 		["ui.play_button"] = "JUGAR",
@@ -65,7 +65,7 @@ local localization = {
 		["ui.you_died"] = "HAS MUERTO",
 		["ui.restart"] = "REINICIAR",
 		["ui.enemy_id"] = "ID: {id}",
-		["ui.game_title"] = "OUTPOST-7",
+		["ui.game_title"] = "SLIME SPAWNER SURVIVAL",
 	},
 	["pt-BR"] = {
 		["ui.play_button"] = "JOGAR",
@@ -76,7 +76,7 @@ local localization = {
 		["ui.you_died"] = "VOCE MORREU",
 		["ui.restart"] = "REINICIAR",
 		["ui.enemy_id"] = "ID: {id}",
-		["ui.game_title"] = "OUTPOST-7",
+		["ui.game_title"] = "SLIME SPAWNER SURVIVAL",
 	},
 	ko = {
 		["ui.play_button"] = "PLAY",
@@ -87,7 +87,7 @@ local localization = {
 		["ui.you_died"] = "YOU DIED",
 		["ui.restart"] = "RESTART",
 		["ui.enemy_id"] = "ID: {id}",
-		["ui.game_title"] = "OUTPOST-7",
+		["ui.game_title"] = "SLIME SPAWNER SURVIVAL",
 	},
 	ja = {
 		["ui.play_button"] = "PLAY",
@@ -98,7 +98,7 @@ local localization = {
 		["ui.you_died"] = "YOU DIED",
 		["ui.restart"] = "RESTART",
 		["ui.enemy_id"] = "ID: {id}",
-		["ui.game_title"] = "OUTPOST-7",
+		["ui.game_title"] = "SLIME SPAWNER SURVIVAL",
 	},
 }
 
