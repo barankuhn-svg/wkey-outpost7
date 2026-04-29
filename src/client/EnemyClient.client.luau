@@ -193,6 +193,7 @@ local function buildEnemy(id, pos, color, material, size)
 	clickDetector.Parent = body
 	clickDetector.MouseClick:Connect(function()
 		showClickIdPopup(body, id, size)
+		print(("[CLIENT] Enemy clicked: ID = %d"):format(id))
 		reEnemyClicked:FireServer(id)
 	end)
 
@@ -335,8 +336,8 @@ local playButton = Instance.new("TextButton")
 playButton.Size = UDim2.new(0.36, 0, 0, 56)
 playButton.Position = UDim2.fromScale(0.32, 0.69)
 playButton.BackgroundColor3 = Color3.fromRGB(90, 255, 150)
-playButton.TextColor3 = Color3.new(1, 1, 1)
-playButton.TextStrokeColor3 = Color3.fromRGB(0, 80, 0)
+playButton.TextColor3 = Color3.fromRGB(20, 55, 180)
+playButton.TextStrokeColor3 = Color3.fromRGB(255, 255, 255)
 playButton.TextStrokeTransparency = 0
 playButton.TextScaled = true
 playButton.Font = Enum.Font.GothamBold
